@@ -1,4 +1,9 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+
+
 
 namespace Platformer
 {
@@ -11,11 +16,9 @@ namespace Platformer
             mover = GetComponent<PlayerMover>();
         }
 
-        void Update()
+        public void OnMove(InputAction.CallbackContext context)
         {
-            var x = Input.GetAxis("Horizontal");
-            var y = Input.GetAxis("Vertical");
-            mover.SetInputVector(new Vector2(x, y));
+            mover.SetInputVector(context.ReadValue<Vector2>());
         }
     }
 }
