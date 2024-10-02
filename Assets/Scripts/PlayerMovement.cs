@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Platformer
 {
-    public class PlayerMover : MonoBehaviour
+    public class PlayerMovement: MonoBehaviour
     {
         [SerializeField] private float MoveSpeed = 3f;
     
