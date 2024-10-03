@@ -3,23 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 namespace Platformer
 {
     public class CoopController : MonoBehaviour
     {
-        public List<GameObject> players;
+        [SerializeField] private List<GameObject> allPlayers = new List<GameObject>();
+        [SerializeField] private List<Transform> startingPoints = new List<Transform>();
+        [SerializeField] private List<LayerMask> playerLayers= new List<LayerMask>();
         
+        public List<GameObject> ActivePlayers { get; private set; } = new List<GameObject>();
         private List<PlayerInputHandler> playersInput = new List<PlayerInputHandler>();
-        
-        private List<PlayerManager> playerManagers = new List<PlayerManager>();
-        
-        [SerializeField] 
-        private List<Transform> startingPoints;
-        
-        [SerializeField]
-        private List<LayerMask> playerLayers;
-        
         private PlayerInputManager playerInputManager;
 
         private void Awake()
@@ -27,12 +22,11 @@ namespace Platformer
             playerInputManager = FindObjectOfType<PlayerInputManager>();
         }
 
+        
+        
         private void OnEnable()
         {
-            foreach (var p in players)
-            {
-                p.SetActive(false);
-            }
+            SetAllPlayersActiveState(false);
             playerInputManager.onPlayerJoined += AddPlayer;
         }
 
@@ -41,19 +35,24 @@ namespace Platformer
             playerInputManager.onPlayerJoined -= AddPlayer;
         }
 
-        public void AddPlayer(PlayerInput playerInput)
+        private void AddPlayer(PlayerInput playerInput)
         {
             int playerIndex = playerInput.playerIndex;
-            
+            if (playerIndex < 0 || playerIndex >= allPlayers.Count)
+            {
+                Debug.LogError("Player index is out of bounds.");
+                return;
+            }
+
             PlayerInputHandler inputHandler = playerInput.GetComponent<PlayerInputHandler>();
             playersInput.Add(inputHandler);
-            
-            if ( players[playerIndex] != null)
+
+            GameObject playerPrefab = allPlayers[playerIndex];
+            if (playerPrefab != null)
             {
-                players[playerIndex].SetActive(true);
-                
-                //StartingPoint
-                players[playerIndex].transform.position = startingPoints[0].position;
+                ActivePlayers.Add(playerPrefab);
+                PlayerTeleport(playerPrefab, startingPoints[playerIndex]);
+                playerPrefab.SetActive(true);
 
                 Debug.Log($"Player {playerIndex} added and initialized.");
             }
@@ -61,6 +60,18 @@ namespace Platformer
             {
                 Debug.LogError("Player could not be initialized.");
             }
+        }
+        
+        private void SetAllPlayersActiveState(bool isActive)
+        {
+            foreach (var player in allPlayers)
+            {
+                player.SetActive(isActive);
+            }
+        }
+        public void PlayerTeleport(GameObject player, Transform target)
+        {
+            player.transform.position = target.position;
         }
     }
 }
