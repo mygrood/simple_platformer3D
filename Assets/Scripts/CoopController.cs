@@ -13,6 +13,8 @@ namespace Platformer
         [SerializeField] private List<Transform> startingPoints = new List<Transform>();
         [SerializeField] private List<LayerMask> playerLayers= new List<LayerMask>();
         
+        [SerializeField] float distanceThreshold = 10f;
+        
         public List<GameObject> ActivePlayers { get; private set; } = new List<GameObject>();
         private List<PlayerInputHandler> playersInput = new List<PlayerInputHandler>();
         private PlayerInputManager playerInputManager;
